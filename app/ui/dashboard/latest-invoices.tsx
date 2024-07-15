@@ -1,12 +1,31 @@
+'use client';
 import { ArrowPathIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import Image from 'next/image';
 import { lusitana } from '@/app/ui/fonts';
 import { LatestInvoice } from '@/app/lib/definitions';
-import { fetchLatestInvoices } from '@/app/lib/data';
+// import { fetchLatestInvoices } from '@/app/lib/data';
+import { useState, useEffect } from 'react';
+import { fetchLatestInvoices } from '@/app/lib/actions';
 
-export default async function LatestInvoices() {
-  const latestInvoices = await fetchLatestInvoices();
+export default function LatestInvoices() {
+  // const latestInvoices = await fetchLatestInvoices();
+  const [latestInvoices, setLatestInvoices] = useState<LatestInvoice[]>([]);
+
+  useEffect(() => {
+    const loadInvoices = async () => {
+      const invoices = await fetchLatestInvoices();
+      setLatestInvoices(invoices);
+    };
+
+    loadInvoices();
+  }, []); // Empty dependency array means this effect runs once on mount
+
+  const handleRefresh = async () => {
+    const latestInvoices = await fetchLatestInvoices();
+    setLatestInvoices(latestInvoices);
+  };
+  console.log(latestInvoices);
 
   return (
     <div className="flex w-full flex-col md:col-span-4">
@@ -17,7 +36,7 @@ export default async function LatestInvoices() {
         {/* NOTE: comment in this code when you get to this point in the course */}
 
         <div className="bg-white px-6">
-          {latestInvoices.map((invoice, i) => {
+          {latestInvoices?.map((invoice, i) => {
             return (
               <div
                 key={invoice.id}
@@ -54,7 +73,10 @@ export default async function LatestInvoices() {
             );
           })}
         </div>
-        <div className="flex items-center pb-2 pt-6">
+        <div
+          className="flex cursor-pointer items-center pb-2 pt-6"
+          // onClick={handleRefresh}
+        >
           <ArrowPathIcon className="h-5 w-5 text-gray-500" />
           <h3 className="ml-2 text-sm text-gray-500 ">Updated just now</h3>
         </div>
